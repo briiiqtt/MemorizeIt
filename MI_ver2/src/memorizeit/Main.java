@@ -14,20 +14,23 @@ public class Main {
 	public void mainMenu() {
 		ld.initialize();
 		System.out.println(
-				"--------------------------\n 1. 목록 조회 | 2. 단어장 열기 | 3. 새 단어장 생성 | 4. 단어장 삭제 \n 0. 종료 \n\n입력 >>");
+				"--------------------------\n 1. 목록 조회(번호 순) | 2. 목록 조회(중요도 순)\n 3. 단어장 선택 | 4. 새 단어장 생성 | 5. 단어장 삭제 \n 0. 종료 \n\n입력 >>");
 		try {
 			int choice = Integer.parseInt(Scn.scn.nextLine());
 			switch (choice) {
 			case 1:
-				ld.viewList();
+				ld.selectListByListNum();
 				break;
 			case 2:
-				ld.selectList();
+				ld.selectListByPriority();
 				break;
 			case 3:
-				ld.newList();
+				ld.selectList();
 				break;
 			case 4:
+				ld.newList();
+				break;
+			case 5:
 				ld.deleteList();
 				break;
 			case 0:

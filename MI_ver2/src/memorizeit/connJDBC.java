@@ -2,11 +2,13 @@ package memorizeit;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class Conn {
+public class connJDBC {
 	Connection conn = null;
-	
+
 	public Connection getConnection() {
 		String user = "hr";
 		String pw = "hr";
@@ -18,6 +20,25 @@ public class Conn {
 			e.printStackTrace();
 		}
 		return conn;
+	}
+
+	public void closeJDBC(Connection conn, Statement stmt, ResultSet rs) {
+		try {
+			rs.close();
+			conn.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void closeJDBC(Connection conn, Statement stmt) {
+		try {
+			conn.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

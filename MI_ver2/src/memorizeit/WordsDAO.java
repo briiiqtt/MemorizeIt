@@ -1,12 +1,15 @@
 package memorizeit;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class WordsDAO extends ListsDAO{
-
+public class WordsDAO extends ListsDAO {
+	connJDBC cj = new connJDBC();
 	boolean keepGoing;
-	
+
 	public void openList(String listName, int vocaNum) {
 		System.out.println(divider);
 		System.out.println("선택  : <" + listName
@@ -40,10 +43,14 @@ public class WordsDAO extends ListsDAO{
 	}
 
 	public void viewWord(String listName, int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try {
 			String query = "select m_word, meanings from words where list_num=" + vocaNum;
-			stmt = conn.getConnection().createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			conn = cj.getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
 			while (rs.next()) {
 				String word = rs.getString(1);
 				String meaning = rs.getString(2);
@@ -51,11 +58,15 @@ public class WordsDAO extends ListsDAO{
 			}
 		} catch (SQLException e) {
 			e.toString();
+		} finally {
+			cj.closeJDBC(conn, stmt, rs);
 		}
 
 	}
 
 	public void addWord(String listName, int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
 		keepGoing = true;
 		while (keepGoing) {
 			System.out.print("\n단어 >>");
@@ -64,10 +75,14 @@ public class WordsDAO extends ListsDAO{
 			String meanings = Scn.scn.nextLine();
 			try {
 				String query = "insert into words values(" + vocaNum + ", '" + words + "', '" + meanings + "', 0)";
-				conn.getConnection().createStatement().execute(query);
+				conn = cj.getConnection();
+				stmt = conn.createStatement();
+				stmt.execute(query);
 				System.out.println("단어 추가됨.");
 			} catch (SQLException e) {
 				e.toString();
+			} finally {
+				cj.closeJDBC(conn, stmt);
 			}
 			keepGoing();
 		}
@@ -75,8 +90,8 @@ public class WordsDAO extends ListsDAO{
 
 	public void searchWord(String listName, int vocaNum) {
 		System.out.println(divider);
-		System.out.println("선택  : <" + listName
-				+ ">\n--------------------------\n 1. 단어로 검색\n 2. 뜻으로 검색\n 0. 초기화면으로\n\n>>");
+		System.out.println(
+				"선택  : <" + listName + ">\n--------------------------\n 1. 단어로 검색\n 2. 뜻으로 검색\n 0. 초기화면으로\n\n>>");
 		int choice = Integer.parseInt(Scn.scn.nextLine());
 		switch (choice) {
 		case 1:
@@ -94,22 +109,24 @@ public class WordsDAO extends ListsDAO{
 	}
 
 	public void searchWordWithWord(String listName, int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		keepGoing = true;
 		while (keepGoing) {
 			System.out.println(divider);
 			System.out.println("선택  : <" + listName + ">");
-			System.out.println(
-					"--------------------------\n\n\n\n 단어 입력 \n>>");
+			System.out.println("--------------------------\n\n\n\n 단어 입력 \n>>");
 			String searchWord = Scn.scn.nextLine();
 
 			try {
 				String query = "select m_word, meanings from words where list_num=" + vocaNum + "and m_word = '"
 						+ searchWord + "'";
-				stmt = conn.getConnection().createStatement();
-				ResultSet rs = stmt.executeQuery(query);
+				conn = cj.getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(query);
 				System.out.println(divider);
-				System.out.println(
-						"선택  : <" + listName + ">\n--------------------------\n");
+				System.out.println("선택  : <" + listName + ">\n--------------------------\n");
 				while (rs.next()) {
 					String word = rs.getString(1);
 					String meaning = rs.getString(2);
@@ -120,6 +137,8 @@ public class WordsDAO extends ListsDAO{
 				System.out.println();
 			} catch (SQLException e) {
 				e.toString();
+			} finally {
+				cj.closeJDBC(conn, stmt, rs);
 			}
 			keepGoing();
 		}
@@ -128,6 +147,9 @@ public class WordsDAO extends ListsDAO{
 	}
 
 	public void searchWordWithMeaning(String listName, int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		keepGoing = true;
 		while (keepGoing) {
 			System.out.println(divider);
@@ -137,8 +159,9 @@ public class WordsDAO extends ListsDAO{
 			try {
 				String query = "select m_word, meanings from words where list_num=" + vocaNum + "and meanings = '"
 						+ searchMeaning + "'";
-				stmt = conn.getConnection().createStatement();
-				ResultSet rs = stmt.executeQuery(query);
+				conn = cj.getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(query);
 				for (int i = 1; i < 15; i++) {
 					System.out.println();
 				}
@@ -151,6 +174,8 @@ public class WordsDAO extends ListsDAO{
 				System.out.println("\n--------------------------\n");
 			} catch (SQLException e) {
 				e.toString();
+			} finally {
+				cj.closeJDBC(conn, stmt, rs);
 			}
 			keepGoing();
 		}
@@ -159,6 +184,8 @@ public class WordsDAO extends ListsDAO{
 	}
 
 	public void deleteWord(String listName, int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
 		keepGoing = true;
 		while (keepGoing) {
 			System.out.println(divider);
@@ -168,11 +195,14 @@ public class WordsDAO extends ListsDAO{
 
 			try {
 				String query = "delete from words where list_num=" + vocaNum + "and m_word = '" + deleteWord + "'";
-				stmt = conn.getConnection().createStatement();
+				conn = cj.getConnection();
+				stmt = conn.createStatement();
 				stmt.execute(query);
 				System.out.println("삭제되었습니다.");
 			} catch (SQLException e) {
 				e.printStackTrace();
+			} finally {
+				cj.closeJDBC(conn, stmt);
 			}
 			keepGoing();
 		}
@@ -181,11 +211,15 @@ public class WordsDAO extends ListsDAO{
 	}
 
 	public void wordTest(String listName, int vocaNum) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
-			String query = "select m_word, meanings from words where is_memorized = 0 and list_num =" + vocaNum
-					+ " order by dbms_random.random";
-			stmt = conn.getConnection().createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			String query = "select m_word, meanings from words where is_memorized = 0 and list_num =? order by dbms_random.random";
+			conn = cj.getConnection();
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, vocaNum);
+			rs = stmt.executeQuery();
 			while (rs.next()) {
 				String word = rs.getString("m_word");
 				String meaning = rs.getString("meanings");
@@ -195,25 +229,48 @@ public class WordsDAO extends ListsDAO{
 				if (answer.equals(meaning)) {
 					System.out.println("딩동댕~\n맞히셨습니다.");
 					String query2 = "update words set is_memorized = 1 where m_word ='" + word + "'";
-					conn.getConnection().createStatement().execute(query2);
+					conn.createStatement().execute(query2);
 				} else {
 					System.out.println("땡! 정답은 < " + meaning + " > 입니다.");
 				}
 			}
+			String query2 = "select count(*) from words";
+			stmt = conn.prepareStatement(query2);
+			rs = stmt.executeQuery();
+			rs.next();
+			int allWord = rs.getInt(1);
+			String query3 = "select count(*) from words where is_memorized = 1";
+			stmt = conn.prepareStatement(query3);
+			rs = stmt.executeQuery();
+			rs.next();
+			int correctWord = rs.getInt(1);
+			if (correctWord == allWord) {
+				System.out.println("모든 문제를 맞히셨습니다. \n시험을 다시 진행하려면 \"맞힌 문제 초기화\"를 해주세요.");
+			} else {
+				System.out.println("< " + vocaNum + " > 현재까지 " + allWord + "문제 중 " + correctWord + "문제 맞히셨습니다.");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			cj.closeJDBC(conn, stmt, rs);
 		}
 	}
 
 	public void reset(int vocaNum) {
+		Connection conn = null;
+		Statement stmt = null;
 		System.out.println("맞힌 문제를 리셋합니다\n\"ok\" : 리셋\n아무 키 : 돌아가기\n>>");
 		String testFinished = Scn.scn.nextLine();
 		if (testFinished.equals("ok")) {
 			try {
 				String query = "update words set is_memorized = 0 where list_num =" + vocaNum;
-				conn.getConnection().createStatement().execute(query);
+				conn = cj.getConnection();
+				stmt = conn.createStatement();
+				stmt.execute(query);
 			} catch (SQLException e) {
 				e.printStackTrace();
+			} finally {
+				cj.closeJDBC(conn, stmt);
 			}
 			System.out.println("리셋 완료");
 		}
